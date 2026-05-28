@@ -72,6 +72,13 @@
 
       </div>
 
+      <div id="turnstileWrap" style="margin-bottom:8px;">
+        <div class="cf-turnstile"
+             data-sitekey="0x4AAAAAADW3xvR2edE_uSNa"
+             data-theme="light"
+             data-callback="onTurnstileReady"></div>
+      </div>
+
       <button class="generate-btn" id="generateBtn">🎲 Generate 生成</button>
 
       <section class="results" id="results" hidden>
@@ -84,12 +91,6 @@
       </section>
     </main>
 
-    <!-- Turnstile 移出畫面外，保留正常渲染 -->
-    <div class="cf-turnstile"
-         data-sitekey="0x4AAAAAADW3xvR2edE_uSNa"
-         data-theme="light"
-         data-callback="onTurnstileReady"
-         style="position:absolute;top:-9999px;left:-9999px;"></div>
 
     <footer>
       <p>NickForge · Made for Gamers 🎮</p>
