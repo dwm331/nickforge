@@ -1,5 +1,12 @@
 const API = 'https://nickforge-api.smallnavel.workers.dev';
 
+let turnstileReady = false;
+
+function onTurnstileReady() {
+  turnstileReady = true;
+  document.getElementById('generateBtn').disabled = false;
+}
+
 const JOBS = {
   mmorpg:  ['劍士', '法師', '弓手', '盜賊', '牧師', '騎士', '召喚師', '舞者', '格鬥家'],
   moba:    ['上單', '打野', '中單', 'ADC', '輔助', '坦克', '刺客', '射手'],
@@ -178,6 +185,8 @@ document.addEventListener('DOMContentLoaded', () => {
     chip.addEventListener('click', () => renderJobs(chip.dataset.value));
   });
 
-  document.getElementById('generateBtn').addEventListener('click', doGenerate);
+  // 等 Turnstile 就緒才啟用按鈕
+  document.getElementById('generateBtn').disabled = true;
   document.getElementById('rerollBtn').addEventListener('click', doGenerate);
+  document.getElementById('generateBtn').addEventListener('click', doGenerate);
 });
