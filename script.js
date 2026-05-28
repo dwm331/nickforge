@@ -56,6 +56,9 @@ function showLoading(on) {
 // ── API Call ─────────────────────────────────────────────────
 
 async function fetchIds() {
+  // 取得 Turnstile token
+  const token = typeof turnstile !== 'undefined' ? turnstile.getResponse() : '';
+
   const params = new URLSearchParams({
     gameType: state.gameType,
     job:      state.job      || '',
@@ -64,9 +67,22 @@ async function fetchIds() {
     elements: state.elements.join(','),
   });
 
-  const res = await fetch(`${API}?${params}`);
+  const res = await fetch(`${API}?${params}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token }),
+  });
+
+  if (res.status === 403) {
+    // token 過期，重設後提示重試
+    if (typeof turnstile !== 'undefined') turnstile.reset();
+    throw new Error('驗證失敗，請稍後再試');
+  }
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const { ids } = await res.json();
+
+  // 每次成功後重設 token（token 是一次性的）
+  if (typeof turnstile !== 'undefined') turnstile.reset();
   return ids;
 }
 
