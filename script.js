@@ -80,6 +80,9 @@ async function fetchIds() {
   }
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const { ids } = await res.json();
+
+  // 靜默刷新 token，讓下次請求有新 token 可用
+  if (typeof turnstile !== 'undefined') turnstile.reset();
   return ids;
 }
 
