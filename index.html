@@ -15,7 +15,11 @@
     </header>
 
     <main>
-      <div class="filters">
+      <div class="filters" id="filtersPanel">
+        <button class="filters-toggle" id="filtersToggle" onclick="toggleFilters()">
+          ▲ 收合篩選
+        </button>
+        <div id="filtersContent">
 
         <!-- Game Type -->
         <div class="filter-group">
@@ -70,7 +74,8 @@
           </div>
         </div>
 
-      </div>
+        </div><!-- /filtersContent -->
+      </div><!-- /filters -->
 
       <div id="turnstileWrap" style="margin-bottom:8px;">
         <div class="cf-turnstile"

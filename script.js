@@ -174,6 +174,15 @@ function initMultiSelect(containerId, key) {
   });
 }
 
+// ── 篩選摺疊 ─────────────────────────────────────────────────
+function toggleFilters() {
+  const content = document.getElementById('filtersContent');
+  const btn     = document.getElementById('filtersToggle');
+  const isOpen  = !content.classList.contains('collapsed');
+  content.classList.toggle('collapsed', isOpen);
+  btn.textContent = isOpen ? '▼ 展開篩選' : '▲ 收合篩選';
+}
+
 // ── Boot ──────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   renderJobs('mmorpg');

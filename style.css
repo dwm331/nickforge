@@ -58,12 +58,34 @@ header p {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 22px;
+  overflow: hidden;
   box-shadow: var(--shadow);
 }
+
+.filters-toggle {
+  width: 100%;
+  padding: 12px 20px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.12s;
+}
+.filters-toggle:hover { background: var(--bg); }
+
+#filtersContent {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  transition: all 0.2s ease;
+}
+#filtersContent.collapsed { display: none; }
 
 .filter-group label {
   display: block;
