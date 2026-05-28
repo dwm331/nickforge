@@ -72,11 +72,6 @@
 
       </div>
 
-      <div class="cf-turnstile"
-           data-sitekey="0x4AAAAAADW3xvR2edE_uSNa"
-           data-theme="light"
-           data-size="flexible"></div>
-
       <button class="generate-btn" id="generateBtn">🎲 Generate 生成</button>
 
       <section class="results" id="results" hidden>
@@ -88,6 +83,12 @@
         <button class="reroll-btn" id="rerollBtn">🔄 再來一批 Reroll</button>
       </section>
     </main>
+
+    <!-- Turnstile 藏在底部，不干擾 UI -->
+    <div class="cf-turnstile"
+         data-sitekey="0x4AAAAAADW3xvR2edE_uSNa"
+         data-theme="light"
+         style="position:absolute;opacity:0;pointer-events:none;height:0;overflow:hidden;"></div>
 
     <footer>
       <p>NickForge · Made for Gamers 🎮</p>
