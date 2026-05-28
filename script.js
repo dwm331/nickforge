@@ -80,9 +80,6 @@ async function fetchIds() {
   }
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const { ids } = await res.json();
-
-  // 每次成功後重設 token（token 是一次性的）
-  if (typeof turnstile !== 'undefined') turnstile.reset();
   return ids;
 }
 
