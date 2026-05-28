@@ -21,6 +21,7 @@ let sessionToken = null;
 
 // Turnstile 驗證成功後 Cloudflare 自動呼叫此 function
 function onTurnstileReady(turnstileToken) {
+  clearTimeout(turnstileTimeout);
   fetch(`${API}/auth`, {
     method:  'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -29,10 +30,35 @@ function onTurnstileReady(turnstileToken) {
   .then(r => r.ok ? r.json() : Promise.reject(r.status))
   .then(({ sessionToken: tok }) => {
     sessionToken = tok;
-    document.getElementById('generateBtn').disabled = false;
-    document.getElementById('generateBtn').textContent = '🎲 Generate 生成';
+    const btn = document.getElementById('generateBtn');
+    btn.disabled = false;
+    btn.textContent = '🎲 Generate 生成';
   })
-  .catch(() => console.warn('取得 Session 失敗'));
+  .catch(() => showRetry());
+}
+
+let turnstileTimeout = null;
+
+function showRetry() {
+  const btn = document.getElementById('generateBtn');
+  btn.disabled = false;
+  btn.textContent = '🔄 驗證失敗，點我重試';
+  btn.onclick = () => {
+    btn.disabled = true;
+    btn.textContent = '⏳ 安全驗證中...';
+    btn.onclick = null;
+    btn.addEventListener('click', doGenerate);
+    if (typeof turnstile !== 'undefined') turnstile.reset();
+    startTurnstileTimeout();
+  };
+  btn.removeEventListener('click', doGenerate);
+}
+
+function startTurnstileTimeout() {
+  clearTimeout(turnstileTimeout);
+  turnstileTimeout = setTimeout(() => {
+    if (!sessionToken) showRetry();
+  }, 15000); // 15 秒還沒驗完就顯示重試
 }
 
 // ── Render ────────────────────────────────────────────────────
@@ -195,8 +221,9 @@ document.addEventListener('DOMContentLoaded', () => {
     chip.addEventListener('click', () => renderJobs(chip.dataset.value));
   });
 
-  // 等 Turnstile 驗完才 enable
+  // 等 Turnstile 驗完才 enable，15秒 timeout 顯示重試
   document.getElementById('generateBtn').disabled = true;
   document.getElementById('generateBtn').addEventListener('click', doGenerate);
   document.getElementById('rerollBtn').addEventListener('click', doGenerate);
+  startTurnstileTimeout();
 });
