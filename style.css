@@ -165,8 +165,8 @@ header p {
 /* ID grid */
 .id-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 8px;
   margin-bottom: 14px;
 }
 
@@ -262,5 +262,5 @@ footer {
 @media (max-width: 480px) {
   header h1 { font-size: 1.7rem; }
   .filters { padding: 16px; gap: 18px; }
-  .id-grid { grid-template-columns: 1fr 1fr; }
+  .id-grid { grid-template-columns: 1fr 1fr 1fr; }
 }
