@@ -1,11 +1,5 @@
 const API = 'https://nickforge-api.smallnavel.workers.dev';
 
-// Turnstile 每次拿到新 token 時呼叫，啟用按鈕
-function onTurnstileReady() {
-  document.getElementById('generateBtn').disabled = false;
-  document.getElementById('generateBtn').textContent = '🎲 Generate 生成';
-}
-
 const JOBS = {
   mmorpg:  ['劍士', '法師', '弓手', '盜賊', '牧師', '騎士', '召喚師', '舞者', '格鬥家'],
   moba:    ['上單', '打野', '中單', 'ADC', '輔助', '坦克', '刺客', '射手'],
@@ -21,6 +15,38 @@ const state = {
   elements: [],
   length:   'short',
 };
+
+// ── Session Token 管理 ────────────────────────────────────────
+let sessionToken   = null;
+let sessionExpiry  = 0;
+let refreshTimer   = null;
+
+// Turnstile 驗證完成後由 Cloudflare 呼叫
+async function onTurnstileReady(turnstileToken) {
+  try {
+    const res  = await fetch(`${API}/auth`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ turnstileToken }),
+    });
+    if (!res.ok) return;
+    const { sessionToken: tok, expiresIn } = await res.json();
+    sessionToken  = tok;
+    sessionExpiry = Date.now() + expiresIn * 1000;
+
+    // 在過期前 30 秒靜默刷新
+    clearTimeout(refreshTimer);
+    refreshTimer = setTimeout(() => {
+      if (typeof turnstile !== 'undefined') turnstile.reset();
+    }, (expiresIn - 30) * 1000);
+
+    // 啟用生成按鈕
+    document.getElementById('generateBtn').disabled = false;
+    document.getElementById('generateBtn').textContent = '🎲 Generate 生成';
+  } catch (e) {
+    console.warn('Session 初始化失敗', e);
+  }
+}
 
 // ── Render ───────────────────────────────────────────────────
 
@@ -55,54 +81,47 @@ function copyId(card) {
 }
 
 function showLoading(on) {
-  document.getElementById('generateBtn').textContent = on ? '⏳ 生成中...' : '🎲 Generate 生成';
-  document.getElementById('generateBtn').disabled = on;
+  const btn = document.getElementById('generateBtn');
+  btn.textContent = on ? '⏳ 生成中...' : '🎲 Generate 生成';
+  btn.disabled    = on;
 }
 
 // ── API Call ─────────────────────────────────────────────────
 
 async function fetchIds() {
-  // 取得 Turnstile token
-  const token = typeof turnstile !== 'undefined' ? turnstile.getResponse() : '';
-
   const params = new URLSearchParams({
     gameType: state.gameType,
-    job:      state.job      || '',
-    style:    state.style    || '',
+    job:      state.job   || '',
+    style:    state.style || '',
     length:   state.length,
     elements: state.elements.join(','),
   });
 
   const res = await fetch(`${API}?${params}`, {
-    method: 'POST',
+    method:  'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ token }),
+    body:    JSON.stringify({ sessionToken }),
   });
 
   if (res.status === 403) {
-    // token 過期，重設後提示重試
+    // Session 過期，重新驗
+    sessionToken = null;
     if (typeof turnstile !== 'undefined') turnstile.reset();
-    throw new Error('驗證失敗，請稍後再試');
+    throw new Error('Session 已過期，請稍候自動刷新');
   }
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const { ids } = await res.json();
-
-  // 用完 token 後立刻 disable 按鈕並刷新 token
-  // 等 onTurnstileReady 回呼才重新 enable
-  document.getElementById('generateBtn').disabled = true;
-  document.getElementById('generateBtn').textContent = '⏳ 驗證中...';
-  if (typeof turnstile !== 'undefined') turnstile.reset();
-
   return ids;
 }
 
 async function doGenerate() {
+  if (!sessionToken) { alert('驗證尚未完成，請稍候'); return; }
   showLoading(true);
   try {
     const ids = await fetchIds();
     renderIds(ids);
   } catch (e) {
-    alert('生成失敗，請稍後再試 🙏');
+    alert(e.message || '生成失敗，請稍後再試 🙏');
     console.error(e);
   } finally {
     showLoading(false);
@@ -188,8 +207,10 @@ document.addEventListener('DOMContentLoaded', () => {
     chip.addEventListener('click', () => renderJobs(chip.dataset.value));
   });
 
-  // 等 Turnstile 就緒才啟用按鈕
+  // 按鈕先 disable，等 Session 拿到才啟用
   document.getElementById('generateBtn').disabled = true;
-  document.getElementById('rerollBtn').addEventListener('click', doGenerate);
-  document.getElementById('generateBtn').addEventListener('click', doGenerate);
+
+  const doGenerateFn = () => doGenerate();
+  document.getElementById('generateBtn').addEventListener('click', doGenerateFn);
+  document.getElementById('rerollBtn').addEventListener('click', doGenerateFn);
 });
