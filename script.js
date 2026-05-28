@@ -1,10 +1,9 @@
 const API = 'https://nickforge-api.smallnavel.workers.dev';
 
-let turnstileReady = false;
-
+// Turnstile 每次拿到新 token 時呼叫，啟用按鈕
 function onTurnstileReady() {
-  turnstileReady = true;
   document.getElementById('generateBtn').disabled = false;
+  document.getElementById('generateBtn').textContent = '🎲 Generate 生成';
 }
 
 const JOBS = {
@@ -88,8 +87,12 @@ async function fetchIds() {
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const { ids } = await res.json();
 
-  // 靜默刷新 token，讓下次請求有新 token 可用
+  // 用完 token 後立刻 disable 按鈕並刷新 token
+  // 等 onTurnstileReady 回呼才重新 enable
+  document.getElementById('generateBtn').disabled = true;
+  document.getElementById('generateBtn').textContent = '⏳ 驗證中...';
   if (typeof turnstile !== 'undefined') turnstile.reset();
+
   return ids;
 }
 
