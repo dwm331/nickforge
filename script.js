@@ -17,34 +17,44 @@ const state = {
 };
 
 // ── Session Token 管理 ────────────────────────────────────────
-let sessionToken   = null;
-let sessionExpiry  = 0;
-let refreshTimer   = null;
+let sessionToken  = null;
+let refreshTimer  = null;
 
-// Turnstile 驗證完成後由 Cloudflare 呼叫
-async function onTurnstileReady(turnstileToken) {
+async function fetchSession(turnstileToken) {
   try {
-    const res  = await fetch(`${API}/auth`, {
+    const res = await fetch(`${API}/auth`, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ turnstileToken }),
     });
     if (!res.ok) return;
     const { sessionToken: tok, expiresIn } = await res.json();
-    sessionToken  = tok;
-    sessionExpiry = Date.now() + expiresIn * 1000;
+    sessionToken = tok;
 
-    // 在過期前 30 秒靜默刷新
+    // 在過期前 30 秒靜默刷新：reset Turnstile → 觸發新 callback
     clearTimeout(refreshTimer);
     refreshTimer = setTimeout(() => {
       if (typeof turnstile !== 'undefined') turnstile.reset();
     }, (expiresIn - 30) * 1000);
 
-    // 啟用生成按鈕
     document.getElementById('generateBtn').disabled = false;
     document.getElementById('generateBtn').textContent = '🎲 Generate 生成';
   } catch (e) {
     console.warn('Session 初始化失敗', e);
+  }
+}
+
+// Turnstile callback（Cloudflare 驗完自動呼叫）
+function onTurnstileReady(token) { fetchSession(token); }
+
+// 頁面載入後主動 poll，不依賴 callback 是否有觸發
+async function pollTurnstileToken() {
+  for (let i = 0; i < 50; i++) {
+    await new Promise(r => setTimeout(r, 200));
+    if (sessionToken) return; // callback 已先處理完
+    if (typeof turnstile === 'undefined') continue;
+    const token = turnstile.getResponse();
+    if (token) { await fetchSession(token); return; }
   }
 }
 
@@ -210,7 +220,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // 按鈕先 disable，等 Session 拿到才啟用
   document.getElementById('generateBtn').disabled = true;
 
-  const doGenerateFn = () => doGenerate();
-  document.getElementById('generateBtn').addEventListener('click', doGenerateFn);
-  document.getElementById('rerollBtn').addEventListener('click', doGenerateFn);
+  document.getElementById('generateBtn').addEventListener('click', doGenerate);
+  document.getElementById('rerollBtn').addEventListener('click', doGenerate);
+
+  // 頁面載入後主動嘗試拿 token（不等 callback）
+  pollTurnstileToken();
 });
