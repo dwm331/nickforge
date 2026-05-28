@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NickForge — 遊戲 ID 生成器</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>NickForge</h1>
+      <p>遊戲 ID 生成器 · Game Nickname Generator</p>
+    </header>
+
+    <main>
+      <div class="filters">
+
+        <!-- Game Type -->
+        <div class="filter-group">
+          <label>遊戲類型 <span class="en">Game Type</span></label>
+          <div class="chips" id="gameType">
+            <button class="chip active" data-value="mmorpg">MMORPG</button>
+            <button class="chip" data-value="moba">MOBA</button>
+            <button class="chip" data-value="fps">FPS 射擊</button>
+            <button class="chip" data-value="sandbox">沙盒 Sandbox</button>
+            <button class="chip" data-value="card">卡牌 Card</button>
+          </div>
+        </div>
+
+        <!-- Job -->
+        <div class="filter-group">
+          <label>職業 / 定位 <span class="en">Role</span></label>
+          <div class="chips" id="jobClass"></div>
+        </div>
+
+        <!-- Style -->
+        <div class="filter-group">
+          <label>風格 <span class="en">Style</span></label>
+          <div class="chips" id="style">
+            <button class="chip" data-value="cool">帥氣 Cool</button>
+            <button class="chip" data-value="cute">可愛 Cute</button>
+            <button class="chip" data-value="funny">幽默 Funny</button>
+            <button class="chip" data-value="lowkey">低調 Lowkey</button>
+          </div>
+        </div>
+
+        <!-- Elements -->
+        <div class="filter-group">
+          <label>元素 <span class="en">Elements</span> <span class="hint">可複選</span></label>
+          <div class="chips multi" id="elements">
+            <button class="chip" data-value="celebrity">藝人 Celebrity</button>
+            <button class="chip" data-value="anime">動漫 Anime</button>
+            <button class="chip" data-value="pun">諧音梗 Pun</button>
+            <button class="chip" data-value="english">純英文 English</button>
+            <button class="chip" data-value="japanese">日文感 Japanese</button>
+          </div>
+        </div>
+
+        <!-- Length -->
+        <div class="filter-group">
+          <label>長度 <span class="en">Length</span></label>
+          <div class="chips" id="length">
+            <button class="chip active" data-value="short">短 Short &nbsp;2–4</button>
+            <button class="chip" data-value="medium">中 Medium &nbsp;5–8</button>
+            <button class="chip" data-value="long">長 Long &nbsp;9+</button>
+          </div>
+        </div>
+
+      </div>
+
+      <button class="generate-btn" id="generateBtn">🎲 Generate 生成</button>
+
+      <section class="results" id="results" hidden>
+        <div class="results-header">
+          <h2>候選 ID</h2>
+          <span class="hint">點擊名稱即可複製</span>
+        </div>
+        <div class="id-grid" id="idGrid"></div>
+        <button class="reroll-btn" id="rerollBtn">🔄 再來一批 Reroll</button>
+      </section>
+    </main>
+
+    <footer>
+      <p>NickForge · Made for Gamers 🎮</p>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
